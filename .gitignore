@@ -1,0 +1,39 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local environment / secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*kubeconfig*
+*kubeconfig
+
+# Terraform / install artifacts (if used in related work)
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.*
+
+# Helm / package artifacts
+*.tgz
+charts/*.tgz
+
+# Logs and temp files
+*.log
+*.tmp
+/tmp/
+
+# Local cluster output / generated files
+output/
+artifacts/
+
+# Python / Node caches (common local tooling noise)
+__pycache__/
+node_modules/

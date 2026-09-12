@@ -1,0 +1,47 @@
+# NodePool: tells Karpenter what kind of node to provision and when to
+# tear it back down. The taint below means ONLY pods that tolerate
+# "workload=ollama" will schedule here, so your other workloads stay on
+# the existing t3.small nodes untouched.
+#
+# consolidationPolicy: WhenEmpty + consolidateAfter: 10m means once the
+# Ollama pod is removed (e.g. you `helm uninstall ollama`), Karpenter
+# will automatically terminate this node ~10 minutes later — no manual
+# cleanup needed to return to your original 3-node t3.small baseline.
+
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: ollama-cpu
+spec:
+  template:
+    metadata:
+      labels:
+        workload: ollama
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: ollama-cpu
+      requirements:
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["m", "c"]
+        - key: karpenter.k8s.aws/instance-size
+          operator: In
+          values: ["xlarge", "2xlarge"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+      taints:
+        - key: workload
+          value: ollama
+          effect: NoSchedule
+  limits:
+    cpu: "8"
+    memory: 32Gi
+  disruption:
+    consolidationPolicy: WhenEmpty
+    consolidateAfter: 10m

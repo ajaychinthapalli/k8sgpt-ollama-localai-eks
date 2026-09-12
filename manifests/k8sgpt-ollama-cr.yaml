@@ -1,0 +1,24 @@
+# K8sGPT operator custom resource — apply after the operator is installed
+# and the Ollama pod is Running with the model pulled.
+#
+#   kubectl apply -f k8sgpt-ollama-cr.yaml
+
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-ollama
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: llama3.2:3b
+    backend: localai
+    baseUrl: http://ollama.ollama.svc.cluster.local:11434/v1
+  noCache: false
+  filters:
+    - Pod
+    - Deployment
+    - Service
+    - Ingress
+    - ReplicaSet
+    - StatefulSet
