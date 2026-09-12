@@ -3,6 +3,7 @@
 # returning the cluster to its original 3x t3.small baseline.
 #
 # Usage: ./scripts/cleanup.sh
+
 set -e
 
 echo "== Removing K8sGPT CR and operator =="
