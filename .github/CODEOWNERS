@@ -1,0 +1,7 @@
+# Default owners for the repository
+* @ajaychinthapalli
+
+# Cluster bootstrap and deployment logic
+/scripts/ @ajaychinthapalli
+/manifests/ @ajaychinthapalli
+/environments/ @ajaychinthapalli

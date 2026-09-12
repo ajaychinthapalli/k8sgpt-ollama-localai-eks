@@ -1,0 +1,37 @@
+# EC2NodeClass: defines the AMI, IAM role, subnets, and security groups
+# Karpenter should use when launching the Ollama node.
+#
+# BEFORE APPLYING:
+# - Replace <CLUSTER_NAME> with your actual EKS cluster name.
+# - Confirm the discovery tag key. Karpenter's install (via eksctl, Terraform,
+#   or the official Getting Started guide) tags your subnets/security groups
+#   with "karpenter.sh/discovery: <cluster-name>" by default — check with:
+#     aws ec2 describe-subnets --filters "Name=tag-key,Values=karpenter.sh/discovery"
+#   If your install used a different tag, swap it in below.
+# - Replace <NODE_ROLE_NAME> with the IAM role Karpenter's node instances use
+#   (created during Karpenter setup, often named "KarpenterNodeRole-<cluster>").
+#   Find it with: aws iam list-roles | grep -i karpenter
+
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: ollama-cpu
+spec:
+  amiFamily: AL2023
+  amiSelectorTerms:
+    - alias: al2023@latest
+  role: "KarpenterNodeRole-ajay-workspace"
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "ajay-workspace"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "ajay-workspace"
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 40Gi
+        volumeType: gp3
+        deleteOnTermination: true
+  tags:
+    purpose: ollama-k8sgpt

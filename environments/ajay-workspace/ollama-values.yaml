@@ -1,0 +1,34 @@
+# Helm values for the ollama-helm chart (CPU-only)
+# Install with:
+#   helm repo add ollama-helm https://otwld.github.io/ollama-helm/
+#   helm upgrade ollama ollama-helm/ollama --namespace ollama \
+#     --create-namespace -f ollama-values.yaml
+
+ollama:
+  gpu:
+    enabled: false
+  models:
+    pull:
+      - llama3.2:3b   # small model, runs reasonably on 4 vCPU / 16GB CPU node
+
+nodeSelector:
+  workload: ollama
+
+tolerations:
+  - key: "workload"
+    operator: "Equal"
+    value: "ollama"
+    effect: "NoSchedule"
+
+persistentVolume:
+  enabled: true
+  size: 20Gi
+  storageClass: gp2
+
+resources:
+  requests:
+    cpu: "2"
+    memory: "8Gi"
+  limits:
+    cpu: "4"
+    memory: "14Gi"
