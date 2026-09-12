@@ -3,10 +3,12 @@
 #
 # BEFORE APPLYING:
 # - Replace <CLUSTER_NAME> with your actual EKS cluster name.
-# - Confirm the discovery tag key. Karpenter's install (via eksctl, Terraform,
-#   or the official Getting Started guide) tags your subnets/security groups
-#   with "karpenter.sh/discovery: <cluster-name>" by default — check with:
-#     aws ec2 describe-subnets --filters "Name=tag-key,Values=karpenter.sh/discovery"
+# - Confirm the discovery tag key. Karpenter's install (via eksctl,
+#   Terraform, or the official Getting Started guide) tags your
+#   subnets/security groups with "karpenter.sh/discovery: <cluster-name>"
+#   by default — check with:
+#     aws ec2 describe-subnets --filters \
+#       "Name=tag-key,Values=karpenter.sh/discovery"
 #   If your install used a different tag, swap it in below.
 # - Replace <NODE_ROLE_NAME> with the IAM role Karpenter's node instances use
 #   (created during Karpenter setup, often named "KarpenterNodeRole-<cluster>").

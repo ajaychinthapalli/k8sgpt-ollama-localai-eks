@@ -3,6 +3,7 @@
 #
 # Usage: ./scripts/install.sh <environment>
 #   e.g. ./scripts/install.sh ajay-workspace
+
 set -e
 
 ENV_NAME="${1:?Usage: ./scripts/install.sh <environment-name> (e.g. ajay-workspace)}"
@@ -22,6 +23,7 @@ ACCOUNT_ID="573631993187"
 echo "== Step 1: EBS CSI driver =="
 echo "Required for PVC provisioning — without it, the Ollama pod's PVC"
 echo "will hang in Pending forever (see docs/TROUBLESHOOTING.md)."
+
 if kubectl get pods -n kube-system 2>/dev/null | grep -q ebs-csi; then
   echo "EBS CSI driver already present, skipping."
 else

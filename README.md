@@ -1,8 +1,12 @@
 # k8sgpt-ollama-localai-eks
 
-AI-powered Kubernetes issue detection on EKS using K8sGPT + a local Ollama LLM, with the inference node provisioned on demand by Karpenter.
+AI-powered Kubernetes issue detection on EKS using K8sGPT + a local Ollama LLM,
+with the inference node provisioned on demand by Karpenter.
 
-This repo deploys a lightweight, CPU-only Ollama workload to a dedicated EKS node pool and connects K8sGPT to it through the OpenAI-compatible `/v1` endpoint. The operator then analyzes cluster resources and asks the local model for explanations and remediation guidance.
+This repo deploys a lightweight, CPU-only Ollama workload to a dedicated EKS
+node pool and connects K8sGPT to it through the OpenAI-compatible `/v1`
+endpoint. The operator then analyzes cluster resources and asks the local model
+for explanations and remediation guidance.
 
 ## Architecture
 
@@ -47,7 +51,9 @@ flowchart LR
     class PVC,CSI storage;
 ```
 
-This layout makes the AWS/EKS dependencies explicit: Karpenter provisions the EC2 node, the EBS CSI driver provisions storage, and the K8sGPT operator sends analysis requests to the local Ollama service running on that dedicated node.
+This layout makes the AWS/EKS dependencies explicit: Karpenter provisions the
+EC2 node, the EBS CSI driver provisions storage, and the K8sGPT operator sends
+analysis requests to the local Ollama service running on that dedicated node.
 
 ## Components
 
@@ -58,7 +64,8 @@ This layout makes the AWS/EKS dependencies explicit: Karpenter provisions the EC
 - Model: `llama3.2:3b`
 - CPU-only deployment
 - PVC-backed model storage
-- Affinity by node selector and taint/toleration to land on a dedicated Karpenter-provisioned node
+- Affinity by node selector and taint/toleration to land on a dedicated
+  Karpenter-provisioned node
 
 The values are defined in `environments/ajay-workspace/ollama-values.yaml`.
 
@@ -66,7 +73,8 @@ The values are defined in `environments/ajay-workspace/ollama-values.yaml`.
 
 - NodePool: `ollama-cpu`
 - EC2NodeClass: `ollama-cpu`
-- Uses a dedicated CPU node with `m` / `c` family instances, sized `xlarge` or `2xlarge`, on-demand only
+- Uses a dedicated CPU node with `m` / `c` family instances, sized `xlarge` or
+  `2xlarge`, on-demand only
 - Taint: `workload=ollama:NoSchedule`
 - Consolidation: `WhenEmpty` with `consolidateAfter: 10m`
 
@@ -86,7 +94,9 @@ The custom resource is in `manifests/k8sgpt-ollama-cr.yaml`.
 
 ## Why the `localai` backend is used
 
-The version of the K8sGPT operator in this environment does not accept `backend: ollama` in its CRD. The supported path is to use the `localai` backend and point it at Ollama's OpenAI-compatible API endpoint at `/v1`.
+The version of the K8sGPT operator in this environment does not accept
+`backend: ollama` in its CRD. The supported path is to use the `localai` backend
+and point it at Ollama's OpenAI-compatible API endpoint at `/v1`.
 
 This is the key configuration:
 
@@ -106,9 +116,11 @@ Before running the install script, the target EKS cluster must already have:
 - An operational EKS cluster
 - Karpenter installed and configured
 - A valid `KarpenterNodeRole-<cluster>` role
-- Subnet and security group tags matching `karpenter.sh/discovery: <cluster-name>`
+- Subnet and security group tags matching
+  `karpenter.sh/discovery: <cluster-name>`
 - EBS CSI driver installed for PVC provisioning
-- A default or explicit `gp2` storage class, because the chart is configured to use `gp2`
+- A default or explicit `gp2` storage class, because the chart is configured to
+  use `gp2`
 
 The install script assumes:
 
@@ -116,7 +128,8 @@ The install script assumes:
 - Region: `us-east-2`
 - Account: `573631993187`
 
-If your values differ, update the constants in `scripts/install.sh` and the Karpenter metadata in `environments/ajay-workspace/*.yaml` before applying.
+If your values differ, update the constants in `scripts/install.sh` and the
+Karpenter metadata in `environments/ajay-workspace/*.yaml` before applying.
 
 ## Repository layout
 
@@ -171,7 +184,8 @@ Expected state:
 - `ollama` pod healthy and running
 - K8sGPT operator pod healthy
 - `kubectl get results` returning findings after a short delay
-- One dedicated compute node for Ollama, not shared with the general cluster workload
+- One dedicated compute node for Ollama, not shared with the general cluster
+  workload
 
 ## Cleanup
 
@@ -190,19 +204,28 @@ This removes:
 
 ## Operational notes
 
-- The model runs on a CPU-only node by design; this is a low-cost development or demo pattern.
-- The PVC is backed by EBS through the CSI driver; without EBS CSI, the volume will remain pending indefinitely.
-- The shared pain points are infrastructure-level rather than application-level, so `kubectl get storageclass`, `kubectl get pods -n kube-system`, and `kubectl explain ec2nodeclass.spec` are useful first checks.
-- See `docs/TROUBLESHOOTING.md` for the exact issues encountered during setup and the fixes that were applied.
+- The model runs on a CPU-only node by design; this is a low-cost development or
+  demo pattern.
+- The PVC is backed by EBS through the CSI driver; without EBS CSI, the volume
+  will remain pending indefinitely.
+- The shared pain points are infrastructure-level rather than application-level,
+  so `kubectl get storageclass`, `kubectl get pods -n kube-system`, and
+  `kubectl explain ec2nodeclass.spec` are useful first checks.
+- See `docs/TROUBLESHOOTING.md` for the exact issues encountered during setup
+  and the fixes that were applied.
 
 ## Notes for future environments
 
 When reusing this repo on a different cluster, review these files first:
 
 - `scripts/install.sh` for cluster name, region, and account values
-- `environments/ajay-workspace/ec2nodeclass.yaml` for the Karpenter discovery tags and node role
-- `environments/ajay-workspace/nodepool.yaml` for taints, requirements, and consolidation policy
-- `environments/ajay-workspace/ollama-values.yaml` for storage class and model sizing
+- `environments/ajay-workspace/ec2nodeclass.yaml` for the Karpenter discovery
+  tags and node role
+- `environments/ajay-workspace/nodepool.yaml` for taints, requirements, and
+  consolidation policy
+- `environments/ajay-workspace/ollama-values.yaml` for storage class and model
+  sizing
 - `manifests/k8sgpt-ollama-cr.yaml` for the backend and base URL
 
-These are the fields that are most likely to need environment-specific adjustment.
+These are the fields that are most likely to need environment-specific
+adjustment.
